@@ -6,37 +6,29 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Data.OleDb;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace BillingSystem
 {
     public partial class Form1 : Form
     {
-        //private OleDbConnection connection = new OleDbConnection();
 
+        static String conString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\Projects\Dot NET\BillingSystem\BillingSystem\Database\productInfo.accdb; Persist Security Info = False; ";
 
+        OleDbConnection connection = new OleDbConnection(conString);
+        
 
         public Form1()
         {
             InitializeComponent();
-
-            
         }
-       
 
 
-        //private void Form1_Load(object sender, EventArgs e)
-        //{
-        //    // TODO: This line of code loads data into the 'productInfoDataSet.SweetData' table. You can move, or remove it, as needed.
-        //    this.sweetDataTableAdapter.Fill(this.productInfoDataSet.SweetData);
+        private void Form1_Load(object sender, EventArgs e)
+        {        
+            this.sweetDataTableAdapter.Fill(this.productInfoDataSet.SweetData);
 
-
-           
-        //    //connection.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\sahilkhan\Documents\Access\productInfo.accdb; Persist Security Info = False; ";
-            
-        //}
-           
-        
-        
+        }       
         
         
 
@@ -58,104 +50,97 @@ namespace BillingSystem
         bool QtyTypeCheck;
         bool PriceTypeCheck;
         int index;
+        double Invoiceval;
         DataGridViewRow selectedRow;
 
 
         /// First Focus
 
-
-
         private void add_Item(object sender, EventArgs e)
         {
+            double temp;
+            bool isNumber = double.TryParse(invoiceNo.Text.Trim(), out temp);
 
-            if (invoiceNo.Text == string.Empty)
-            {
-                MessageBox.Show("Enter Invoice Number", "Error", MessageBoxButtons.OK);
-            }
-            else
-            {
-                new_Order.Enabled = true;
-
-                if (itemName.Text != string.Empty && QtyTypeCheck == true && PriceTypeCheck == true && itemQantity.Text != string.Empty && itemQantity.Text != string.Empty)
+                if (invoiceNo.Text == string.Empty || !isNumber)
                 {
-                    num++;
+                    MessageBox.Show("Enter Valid Invoice Number", "Error", MessageBoxButtons.OK);
                 }
-
-                if (showMessage())
+                else
                 {
-                    // hsn default Value
-                    if (hsnCode.Text == string.Empty && gstinNo.Text == string.Empty)
+                    new_Order.Enabled = true;
+
+                    if (itemName.Text != string.Empty && QtyTypeCheck == true && PriceTypeCheck == true && itemQantity.Text != string.Empty && itemQantity.Text != string.Empty)
                     {
-                        hsnCode.Text = "20001";
-                        gstinNo.Text  = "02ADZPN7340J2Z2";
+                        num++;
                     }
 
+                    if (showMessage())
+                    {
+                        // hsn default Value
+                        if (hsnCode.Text == string.Empty && gstinNo.Text == string.Empty)
+                        {
+                            hsnCode.Text = "20001";
+                            gstinNo.Text = "02ADZPN7340J2Z2";
+                        }
 
-                    dataGridConnect();
 
-                    //try
-                    //{
-                    //    OleDbCommand command = connection.CreateCommand();
-                    //    connection.Open();
-                    //    double Invoiceval = Convert.ToDouble(invoiceNo.Text);
-                    //    command.CommandText = "Insert into SweetData (SrNo, InvoiceNo, ProductName, Rate, Qantity, Amount) values('"+num+"', '"+ Invoiceval+"', '"+ itemName.Text + "', '"+ itemPrice.Text + "','"+itemQantity.Text + "','" +itemProduct+ "')";
-                    //    command.Connection = connection;
-                    //    command.ExecuteNonQuery();
+                        dataGridConnect();
+                        gstData();
 
-                    //    connection.Close();
+                        /// DataBase /////
+                        try
+                        {
+                            OleDbCommand command = connection.CreateCommand();
+                            connection.Open();
+                            Invoiceval = Convert.ToDouble(invoiceNo.Text);
+                            command.CommandText = "Insert into SweetData (SrNo, InvoiceNo, ProductName, Rate, Qantity, Amount, InvoiceDate, State1, StateCode1, TransportMode, VehicalNo, DateOfSupply, PlaceOfSupply, NameAndAdd, GstinNo, State2, StateCode2, Labour, HsnCode, CgstRate, SgstRate, CgstAmount, SgstAmount) values('" + num + "', '" + Invoiceval + "', '" + itemName.Text + "', '" + itemPrice.Text + "','" + itemQantity.Text + "','" + itemProduct + "', '" + invoiceDate.Text + "', '" + state.Text + "', '" + stateCode.Text + "', '" + transpostMode.Text + "', '" + vehicalNo.Text + "', '" + dateOfSupply.Text + "','" + placeOfSupply.Text + "','" + nameAndAddress.Text + "','" + gstinNo.Text + "','" + state2.Text + "','" + state2Code.Text + "','" + labourValue.Text + "', '" + hsnCode.Text + "','" + "2.5%" + "','" + "2.5 %" + "','" + itemProduct * 0.025 + "','" + itemProduct * 0.025 + "')";
+                            command.Connection = connection;
+                            command.ExecuteNonQuery();
+                            connection.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("" + ex);
+                        }
+                    }
 
-                    //}catch(Exception ex)
-                    //{
-                    //    MessageBox.Show("" + ex);
-                    //}
-
-                    //try
-                    //{
-                    //    connection.Open();
-
-                    //    OleDbCommand com = new OleDbCommand();
-
-                    //    string query = "Select * from SweetData ";
-                    //    com.CommandText = query;
-                    //    com.Connection = connection;
-                    //    com.ExecuteNonQuery();
-
-                    //    OleDbDataAdapter da = new OleDbDataAdapter(com);
-                    //    DataTable dt = new DataTable();
-                    //    da.Fill(dt);
-                    //    dataGridView.DataSource = dt;
-
-                    //    connection.Close();
-                    //}
-                    //catch(Exception ex)
-                    //{
-                    //    MessageBox.Show("" + ex);
-                    //}
+                    itemName.Clear();
+                    itemQantity.Clear();
+                    itemPrice.Clear();
+                    itemName.Focus();
+                    add_item.Enabled = false;
+                    deleteItem.Enabled = true;
                 }
+            
+        }
 
+        private bool isInvoiceExisted(string invoiceNumber)
+        {
+            bool result = false;
+            try
+            {
+                OleDbCommand cmd = connection.CreateCommand();
+                connection.Open();
+                string query = "Select Count(*) From SweetData Where InvoiceNo = " + invoiceNumber;
+                cmd.CommandText = query;
+                int rowCount = (int)cmd.ExecuteScalar();
+                connection.Close();
+                if (rowCount > 0)
+                    result = true;
+                else
+                    result = false;
 
-                gstData();
-
-
-
-                itemName.Clear();
-                itemQantity.Clear();
-                itemPrice.Clear();
-
-                itemName.Focus();
-
-                add_item.Enabled = false;
-
-            }
-
-
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }           
+            return result;
         }
 
         private void resetValues_Click(object sender, EventArgs e)
         {
             countValue++;
             num = 0;
-
 
             itemName.Clear();
             itemQantity.Clear();
@@ -166,12 +151,7 @@ namespace BillingSystem
             itemFinalPrice = 0;
             itemProduct = 0;
 
-
-
-
             itemName.Focus();
-
-
 
             /// AMOUNT SHOW ITEMS
             allProductTotalAmount.Text = "0";
@@ -179,60 +159,35 @@ namespace BillingSystem
             sgstAmount.Text = "0";
             grandTotal.Text = "0";
 
-
             dataGridView.DataSource = null;
             GridItems.Clear();
-
-
         }
-
-
-
-
 
         private void valueEntry()
         {
-
             if (itemQantity.Text != string.Empty && itemPrice.Text != string.Empty)
             {
                 double rate = Convert.ToDouble(itemPrice.Text);
                 double qty = Convert.ToDouble(itemQantity.Text);
-
                 itemProduct = qty * rate;
-
             }
-
             itemFinalPrice = itemFinalPrice + itemProduct;
-
-
-
-
         }
-
-
         /// 
         /// CalCulations
         ///
 
         private void gstData()
         {
-
             valueEntry();
 
-
             //CGST
-
             valuecgst = 0.025;
             cgstCalValue = itemFinalPrice * valuecgst;
 
-
-
-
             //SGST
-
             valuesgst = 0.025;
             sgstCalValue = itemFinalPrice * valuesgst;
-
 
             //CGST AMOUNT...........
             calculatedCgst =  cgstCalValue;
@@ -240,7 +195,6 @@ namespace BillingSystem
             calculatedSgst =  sgstCalValue;
             //Total GST
             totalGST = cgstCalValue + sgstCalValue;
-
 
             ///////////////////////////////////////      Labour Amount ////////////////
             if (labourValue.Text == string.Empty)
@@ -262,25 +216,18 @@ namespace BillingSystem
             allProductTotalAmount.Text = itemFinalPrice.ToString();
 
             // Total Price with GST
-            grandTotal.Text = totalPrice.ToString();
-
-           
-        }
-        
+            grandTotal.Text = totalPrice.ToString();           
+        }        
 
         ///Dialog Message on empty textArea
-
         private bool showMessage()
         {
-
-
             if (itemName.Text.Trim() == string.Empty)
             {
                 MessageBox.Show("Enter Product Name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 itemName.Focus();
                 return false;
             }
-
 
             if (itemQantity.Text.Trim() == string.Empty)
             {
@@ -292,17 +239,13 @@ namespace BillingSystem
             {
                 double temp;
                 bool isNumber = double.TryParse(itemQantity.Text.Trim(), out temp);
-
                 QtyTypeCheck = isNumber;
 
                 if (!isNumber)
                 {
-
                     MessageBox.Show("Enter a Numeric Qantity Value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     itemQantity.Clear();
                     itemQantity.Focus();
-
-
                     return false;
                 }
             }
@@ -317,36 +260,24 @@ namespace BillingSystem
             {
                 double temp;
                 bool isNumber = double.TryParse(itemPrice.Text.Trim(), out temp);
-
                 PriceTypeCheck = isNumber;
 
                 if (!isNumber)
                 {
-
                     MessageBox.Show("Enter a Numeric Price Value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     itemPrice.Clear();
                     itemPrice.Focus();
-
-
                     return false;
-                }
-                
-
+                }  
             }
-
-
             return true;
         }
-
 
         // // // // // // // // // //             Data Grid View                // // // // / // / // //
         public void dataGridConnect()
         {
-
-
             Allitems items = new Allitems()
             {
-
                 SrNo = num,
                 ProductName = itemName.Text,
                 Qantity = Convert.ToDouble(itemQantity.Text.Trim()),
@@ -357,21 +288,12 @@ namespace BillingSystem
                 SgstRate = "2.5%",
                 CgstAmount = (((Convert.ToDouble(itemQantity.Text.Trim()) * Convert.ToDouble(itemPrice.Text.Trim())) * 0.025)),
                 SgstAmount = (((Convert.ToDouble(itemQantity.Text.Trim()) * Convert.ToDouble(itemPrice.Text.Trim())) * 0.025))
-
-
-
+                
             };
-
             GridItems.Add(items);
-
             dataGridView.DataSource = null;
             dataGridView.DataSource = GridItems;
-
-
-
         }
-
-
 
         private void itemPrice_TextChanged(object sender, EventArgs e)
         {
@@ -391,8 +313,6 @@ namespace BillingSystem
                 new_Order.Focus();
             }
         }
-
-
 
         private void StateCodeToTransportMode(object sender, KeyEventArgs e)
         {
@@ -462,8 +382,6 @@ namespace BillingSystem
             }
         }
 
-
-
         private void QtyToRate(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Up)
@@ -516,7 +434,6 @@ namespace BillingSystem
             if (e.KeyCode == Keys.Enter)
             {
                 dateOfSupply.Focus();
-
             }
             else if (e.KeyCode == Keys.Up)
             {
@@ -550,15 +467,11 @@ namespace BillingSystem
             }
         }
 
-
-
-
         private void state2_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
                 state2Code.Focus();
-
             }
             else if (e.KeyCode == Keys.Up)
             {
@@ -571,16 +484,12 @@ namespace BillingSystem
             if (e.KeyCode == Keys.Enter)
             {
                 state2.Focus();
-
             }
             else if (e.KeyCode == Keys.Up)
             {
                 nameAndAddress.Focus();
             }
         }
-
-
-
         //
         //
         //......................................... PrintPreview And PrintDocument.................................
@@ -593,24 +502,21 @@ namespace BillingSystem
             if(BSprintPreviewDialog.IsDisposed == true)
             {
                BSprintPreviewDialog = new PrintPreviewDialog();
-            }
-            
-
+            }         
             BSprintPreviewDialog.Show();
         }
 
         private void BSprintDocument_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
         {
-
             Pen BlackPen = new Pen(Color.Black, 1);
             
 
 
             e.Graphics.DrawString("TAX INVOICE", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, new Point(410, 2));
-            e.Graphics.DrawString("R.D.T. ENTERPRISES", new Font("Arial", 32, FontStyle.Regular), Brushes.Black, new Point(200, 8));
+            e.Graphics.DrawString("Billing System", new Font("Arial", 32, FontStyle.Regular), Brushes.Black, new Point(300, 8));
 
 
-            e.Graphics.DrawString(addressOfCorp.Text, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(255, 54));
+            //e.Graphics.DrawString(addressOfCorp.Text, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(255, 54));
             e.Graphics.DrawString(GstIN.Text, new Font("Arial", 7, FontStyle.Bold), Brushes.Black, new Point(700, 40));
             e.Graphics.DrawString("Phone : 0177-2841694", new Font("Arial", 7, FontStyle.Bold), Brushes.Black, new Point(700, 20));
 
@@ -652,9 +558,6 @@ namespace BillingSystem
 
             //e.Graphics.DrawString(placeOfSupply.Text, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(700, 124));
 
-
-
-
             // // // // // // // // // // //                       Lines......................... // // // // // 
             Point pointOne = new Point(0, 68);
             Point pointSecond = new Point(850, 68);
@@ -682,7 +585,7 @@ namespace BillingSystem
             Point p15 = new Point(348, 240);
             Point p16 = new Point(348, 800);
 
-    //Mid Line
+            //Mid Line
             Point p17 = new Point(418, 240);
             Point p18 = new Point(418, 950);
 
@@ -719,7 +622,6 @@ namespace BillingSystem
             // Gst coloum line
             Point p37 = new Point(518, 260);
             Point p38 = new Point(850, 260);
-
 
 
 
@@ -795,9 +697,9 @@ namespace BillingSystem
             // /// // / / Footer
 
             e.Graphics.DrawString("Note :", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, new Point(10, 950));
-            e.Graphics.DrawString("All Subjects To Shimla Jurisdiction Only\nGoods once sold will not be taken back.\nChanna, Paneer & Khoya Products to be consumed same day.", new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(40, 970));
+            //e.Graphics.DrawString("All Subjects To Shimla Jurisdiction Only\nGoods once sold will not be taken back.\nChanna, Paneer & Khoya Products to be consumed same day.", new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(40, 970));
 
-            e.Graphics.DrawString("For R.D.T. Enterprises", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, new Point(700, 950));
+            //e.Graphics.DrawString("For R.D.T. Enterprises", new Font("Arial", 9, FontStyle.Bold), Brushes.Black, new Point(700, 950));
             e.Graphics.DrawString("Authority Signatory", new Font("Arial", 8, FontStyle.Regular), Brushes.Black, new Point(700, 1050));
         }
 
@@ -847,65 +749,32 @@ namespace BillingSystem
         {
             index = e.RowIndex;
             selectedRow = dataGridView.Rows[index];
-            
-
-            //try
-            //{
-            //    selectedValue = dataGridView.Rows[e.RowIndex].Cells["SrNo"].FormattedValue.ToString();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("" + ex);
-            //}
         }
 
         private void deleteItem_Click(object sender, EventArgs e)
-        {
-            
-
+        {         
             if(dataGridView.DataSource != null)
             {
                 int selectedvalue = dataGridView.CurrentCell.RowIndex + 1;
+                string productName = dataGridView.SelectedCells[1].Value.ToString();
+                MessageBox.Show("Invoice Number: "+invoiceNo.Text+"Sr No "+ selectedvalue+ "PName: " + productName);
                 DialogResult result = new DialogResult();
                 result = MessageBox.Show("Are You Sure To Delete Product At SrNo " + selectedvalue, "Delete Product", MessageBoxButtons.OKCancel);
 
                 if (result == DialogResult.OK)
                 {
                    try
-                    {
+                    {                        
                         int rowIndex = dataGridView.CurrentCell.RowIndex;
                         GridItems.RemoveAt(rowIndex);
-
                         dataGridView.DataSource = null;
                         dataGridView.DataSource = GridItems;
 
-
-                        /// calculation
-                        double totalAfter = GridItems.Sum(X => X.TotalAmount);
-                        itemFinalPrice = totalAfter;
-
-
-                        double cgstAfter = totalAfter * 0.025;
-                        cgstCalValue = cgstAfter;
-                        double sgstAfter = totalAfter * 0.025;
-                        sgstCalValue = sgstAfter;
-
-
-                        double totalGstAfter = cgstCalValue + sgstCalValue;
-                        totalGST = totalGstAfter;
-
-                        double grandTotalAfter = totalAfter + totalGstAfter;
-                        totalPrice = grandTotalAfter;
-
-
-                        allProductTotalAmount.Text = totalAfter.ToString();
-                        cgstAmount.Text = cgstAfter.ToString();
-                        sgstAmount.Text = sgstAfter.ToString();
-                        grandTotal.Text = grandTotalAfter.ToString();
-
+                        gridItemsCalculation();                                    
                         num--;
 
-
+                        deleteFromDataBase(selectedvalue, productName);
+                        updateSrNumber(GridItems.Count(), selectedvalue);
                     }
                     catch (Exception)
                     {
@@ -919,7 +788,69 @@ namespace BillingSystem
             }
         }
 
-       
+        private void gridItemsCalculation()
+        {
+            /// calculation
+            double totalAfter = GridItems.Sum(X => X.TotalAmount);
+            itemFinalPrice = totalAfter;
+
+            double cgstAfter = totalAfter * 0.025;
+            cgstCalValue = cgstAfter;
+            double sgstAfter = totalAfter * 0.025;
+            sgstCalValue = sgstAfter;
+
+            double totalGstAfter = cgstCalValue + sgstCalValue;
+            totalGST = totalGstAfter;
+
+            double grandTotalAfter = totalAfter + totalGstAfter;
+            totalPrice = grandTotalAfter;
+
+            allProductTotalAmount.Text = totalAfter.ToString();
+            cgstAmount.Text = cgstAfter.ToString();
+            sgstAmount.Text = sgstAfter.ToString();
+            grandTotal.Text = grandTotalAfter.ToString();
+        }
+
+        private void updateSrNumber(int totalItems, int selectedvalue)
+        {
+            for (int i = selectedvalue + 1 ; i <= totalItems + 1; i++)
+            {
+                try
+                {
+                    OleDbCommand cmd = connection.CreateCommand();
+                    connection.Open();
+                    string query = "Update SweetData Set SrNo ="+(i-1)+" Where InvoiceNo =" + invoiceNo.Text + " And SrNo=" + i;
+                    cmd.CommandText = query;
+                    cmd.Connection = connection;
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+                    MessageBox.Show("Current val: " + i);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+            }
+        }
+
+        private void deleteFromDataBase(int srNo, String productName)
+        {
+            try
+            {
+                OleDbCommand command = connection.CreateCommand();
+                connection.Open();
+                string query = "Delete From SweetData Where InvoiceNo =" + invoiceNo.Text + " And SrNo =" + srNo.ToString() + " And ProductName ='" + productName + "'";
+                command.CommandText = query;
+                command.Connection = connection;
+                command.ExecuteNonQuery();
+
+                MessageBox.Show("Data Deleted successfully.", "",MessageBoxButtons.OK);
+                connection.Close();
+            }catch(Exception e)
+            {
+                MessageBox.Show("" + e);
+            }
+        }
 
         private void dataGridView_KeyDown(object sender, KeyEventArgs e)
         {
@@ -929,8 +860,114 @@ namespace BillingSystem
             }
         }
 
-        
-}
+        private void ShowDataBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                String SearchInvoiceText = SearchInvoice.Text;
+                if (SearchInvoiceText != "")
+                {
+                    connection.Open();
+                    OleDbCommand com = new OleDbCommand();
+                    string query = "Select SrNo, ProductName, Rate, Qantity, Amount, HsnCode, CgstRate, SgstRate, CgstAmount, SgstAmount, InvoiceDate, State1, StateCode1, TransportMode, VehicalNo, DateOfSupply, PlaceOfSupply, NameAndAdd, GstinNo, State2, StateCode2, Labour, HsnCode  from SweetData  Where InvoiceNo = " + SearchInvoiceText.ToString();
+                    com.CommandText = query;
+                    com.Connection = connection;
+                    com.ExecuteNonQuery();
+                    OleDbDataAdapter da = new OleDbDataAdapter(com);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                                     
+                    GridItems.Clear();
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        int srnum = (int) row[0];
+                        string pName = row[1].ToString();
+                        double qantity = (double) row[2];
+                        double rate = (double) row[3];
+                        double amount = (double) row[4];
+                        string hsncode = row[5].ToString();
+                        //string cgstR = row[6].ToString();
+                        //string sgstR = row[7].ToString();
+                        double cgstA = (double) row[8];
+                        double sgstA = (double) row[9];
+
+                        //Put values in text fields
+                        invoiceNo.Text = SearchInvoiceText;
+                        invoiceDate.Text = row[10].ToString();
+                        state.Text = row[11].ToString();
+                        stateCode.Text = row[12].ToString();
+                        transpostMode.Text = row[13].ToString();
+                        vehicalNo.Text = row[14].ToString();
+                        dateOfSupply.Text = row[15].ToString();
+                        placeOfSupply.Text = row[16].ToString();
+                        nameAndAddress.Text = row[17].ToString();
+                        gstinNo.Text = row[18].ToString();
+                        state2.Text = row[19].ToString();
+                        state2Code.Text = row[20].ToString();
+                        labourValue.Text = row[21].ToString();
+                        hsnCode.Text = row[22].ToString();
+
+
+                        Allitems items = new Allitems()
+                        {
+                            SrNo = srnum,
+                            ProductName = pName,
+                            Qantity = qantity,
+                            Rate = rate,
+                            TotalAmount = amount,
+                            HsnCode = hsncode,
+                            CgstRate = "2.5%",
+                            SgstRate = "2.5%",
+                            CgstAmount = cgstA,
+                            SgstAmount = sgstA
+                        };
+
+                        GridItems.Add(items);
+                        dataGridView.DataSource = null;
+                        dataGridView.DataSource = GridItems;
+                    }
+
+                    gridItemsCalculation();
+                    deleteItem.Enabled = false;
+                    connection.Close();
+                    new_Order.Enabled = true;
+                    new_Order.Focus();
+                    add_item.Enabled = false;
+                }
+                else
+                {
+                    MessageBox.Show("Enter any existing invoice number.");
+                }
+            
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(""+ex);
+            }
+        }
+
+        private void invoiceCheck(object sender, EventArgs e)
+        {
+            if (isInvoiceExisted(invoiceNo.Text))
+            {
+                MessageBox.Show("Invoice Number Already Existed.", "Warning");
+                itemName.Enabled = false;
+                itemQantity.Enabled = false;
+                itemPrice.Enabled = false;
+                add_item.Enabled = false;
+                invoiceNo.Clear();
+                invoiceNo.Focus();
+            }
+            else
+            {
+                itemName.Enabled = true;
+                itemQantity.Enabled = true;
+                itemPrice.Enabled = true;
+                add_item.Enabled = true;
+            }
+
+        }
+    }
 
 }
 

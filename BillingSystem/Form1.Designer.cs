@@ -95,8 +95,8 @@
             this.button4 = new System.Windows.Forms.Button();
             this.PrintButton = new System.Windows.Forms.Button();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.SearchInvoice = new System.Windows.Forms.TextBox();
+            this.ShowDataBtn = new System.Windows.Forms.Button();
             this.label24 = new System.Windows.Forms.Label();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.sweetDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
@@ -420,6 +420,7 @@
             this.invoiceNo.Size = new System.Drawing.Size(100, 20);
             this.invoiceNo.TabIndex = 1;
             this.invoiceNo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.invoiceNoToDate);
+            this.invoiceNo.Leave += new System.EventHandler(this.invoiceCheck);
             // 
             // label6
             // 
@@ -678,9 +679,9 @@
             this.corName.Location = new System.Drawing.Point(477, 9);
             this.corName.Name = "corName";
             this.corName.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.corName.Size = new System.Drawing.Size(388, 39);
+            this.corName.Size = new System.Drawing.Size(237, 39);
             this.corName.TabIndex = 10;
-            this.corName.Text = "R. D. T. ENTERPRISES";
+            this.corName.Text = "Billing System";
             this.corName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // addressOfCorp
@@ -688,9 +689,9 @@
             this.addressOfCorp.AutoSize = true;
             this.addressOfCorp.Location = new System.Drawing.Point(504, 48);
             this.addressOfCorp.Name = "addressOfCorp";
-            this.addressOfCorp.Size = new System.Drawing.Size(315, 13);
+            this.addressOfCorp.Size = new System.Drawing.Size(89, 13);
             this.addressOfCorp.TabIndex = 21;
-            this.addressOfCorp.Text = "Shiv Darshan, Bhavan, Cemetery Road, Sanjauli, Shimla - 6(H.P.)";
+            this.addressOfCorp.Text = "A Simple Solution";
             // 
             // GstIN
             // 
@@ -758,24 +759,25 @@
             this.groupBox8.TabIndex = 24;
             this.groupBox8.TabStop = false;
             // 
-            // textBox1
+            // SearchInvoice
             // 
-            this.textBox1.Location = new System.Drawing.Point(139, 48);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(91, 20);
-            this.textBox1.TabIndex = 23;
+            this.SearchInvoice.Location = new System.Drawing.Point(139, 48);
+            this.SearchInvoice.Name = "SearchInvoice";
+            this.SearchInvoice.Size = new System.Drawing.Size(91, 20);
+            this.SearchInvoice.TabIndex = 23;
             // 
-            // button1
+            // ShowDataBtn
             // 
-            this.button1.BackColor = System.Drawing.SystemColors.ScrollBar;
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(51, 89);
-            this.button1.Name = "button1";
-            this.button1.Padding = new System.Windows.Forms.Padding(20, 0, 20, 0);
-            this.button1.Size = new System.Drawing.Size(150, 39);
-            this.button1.TabIndex = 23;
-            this.button1.Text = "Show Data";
-            this.button1.UseVisualStyleBackColor = false;
+            this.ShowDataBtn.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.ShowDataBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ShowDataBtn.Location = new System.Drawing.Point(51, 89);
+            this.ShowDataBtn.Name = "ShowDataBtn";
+            this.ShowDataBtn.Padding = new System.Windows.Forms.Padding(20, 0, 20, 0);
+            this.ShowDataBtn.Size = new System.Drawing.Size(179, 39);
+            this.ShowDataBtn.TabIndex = 23;
+            this.ShowDataBtn.Text = "Show Data";
+            this.ShowDataBtn.UseVisualStyleBackColor = false;
+            this.ShowDataBtn.Click += new System.EventHandler(this.ShowDataBtn_Click);
             // 
             // label24
             // 
@@ -789,8 +791,8 @@
             // groupBox9
             // 
             this.groupBox9.Controls.Add(this.label24);
-            this.groupBox9.Controls.Add(this.button1);
-            this.groupBox9.Controls.Add(this.textBox1);
+            this.groupBox9.Controls.Add(this.ShowDataBtn);
+            this.groupBox9.Controls.Add(this.SearchInvoice);
             this.groupBox9.Location = new System.Drawing.Point(12, 519);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Size = new System.Drawing.Size(454, 135);
@@ -918,8 +920,8 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button PrintButton;
         private System.Windows.Forms.GroupBox groupBox8;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox SearchInvoice;
+        private System.Windows.Forms.Button ShowDataBtn;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.Button deleteItem;
